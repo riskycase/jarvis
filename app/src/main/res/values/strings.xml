@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Jarvis</string>
+    <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="next">Clear</string>
+
+    <string name="service_name">Notification service</string>
+    <string name="first_fragment_label">First</string>
+    <string name="accessibility_service_name">Jarvis Accessibility Service</string>
+    <string name="accessibility_service_description">Used to detect when Snapchat is in foreground to cancel the notification</string>
+    <string name="notification_access_text">Notification access status: </string>
+    <string name="granted">Granted</string>
+    <string name="usage_access_text">Usage access status: </string>
+    <string name="unavailable">Not granted</string>
+    <string name="grant_perm">Grant</string>
+    <string name="notification_access_reason">Jarvis uses notification access to intercept your Snapchat notifications and compile them into a single notification</string>
+    <string name="usage_access_reason">Usage access allows Jarvis to know when you open Snapchat so it can cancel the notification</string>
+    <string name="revoke_permission">Revoke</string>
+</resources>
