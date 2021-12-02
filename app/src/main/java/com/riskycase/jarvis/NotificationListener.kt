@@ -40,17 +40,22 @@ class NotificationListener: NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         if(sbn.packageName == "com.snapchat.android") {
+            var sender: String? = null;
             if(sbn.notification.extras.getString(Notification.EXTRA_TITLE, "default value").substring(0, 5) == "from " ||
                     sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").substring(0, 5) == "from ") {
-                val sender =
+                sender =
                     if (sbn.notification.extras.getString(Notification.EXTRA_TITLE, "default value").substring(0, 5) == "from ")
                         sbn.notification.extras.getString(Notification.EXTRA_TITLE, "default value").substring(5)
                     else
                         sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").substring(5)
+
+            }
+            else if(sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value") == "sent a Snap!")
+                sender = sbn.notification.extras.getString(Notification.EXTRA_TITLE, "default value")
+            if(!sender.isNullOrBlank()){
                 val snap = Snap(sbn.key.plus("|").plus(sbn.postTime), sender, sbn.postTime)
                 databaseHelper.add(snap)
                 super.cancelNotification(sbn.key)
-                Log.d("intercept", snap.toString())
                 NotificationMaker().makeNotification(applicationContext)
             }
         }
