@@ -41,15 +41,16 @@ class NotificationListener: NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         if(sbn.packageName == "com.snapchat.android") {
             var sender: String? = null;
-            if(sbn.notification.extras.getString(Notification.EXTRA_TITLE, "default value").substring(0, 5) == "from " ||
-                    sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").substring(0, 5) == "from ") {
-                sender =
-                    if (sbn.notification.extras.getString(Notification.EXTRA_TITLE, "default value").substring(0, 5) == "from ")
-                        sbn.notification.extras.getString(Notification.EXTRA_TITLE, "default value").substring(5)
-                    else
-                        sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").substring(5)
-
-            }
+            if(
+                sbn.notification.extras.getString(Notification.EXTRA_TITLE, "default value").length >= 5 &&
+                sbn.notification.extras.getString(Notification.EXTRA_TITLE, "default value").substring(0, 5) == "from "
+            )
+                sender = sbn.notification.extras.getString(Notification.EXTRA_TITLE, "default value").substring(5)
+            else if(
+                sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").length >= 5 &&
+                sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").substring(0, 5) == "from "
+            )
+                sender = sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").substring(5)
             else if(sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").substring(0,11) == "sent a Snap")
                 sender = sbn.notification.extras.getString(Notification.EXTRA_TITLE, "default value")
             if(!sender.isNullOrBlank()){
