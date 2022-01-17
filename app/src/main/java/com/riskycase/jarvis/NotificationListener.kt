@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.util.Log
 
 class NotificationListener: NotificationListenerService() {
 
@@ -18,11 +19,7 @@ class NotificationListener: NotificationListenerService() {
     override fun onCreate() {
         databaseHelper = DatabaseHelper(applicationContext)
         val mainHandler = Handler(Looper.getMainLooper())
-
-        filters = emptyArray()
-        filters = filters.plusElement(Filter(title = "from $1", text = ""))
-        filters = filters.plusElement(Filter(title = "", text = "from $1"))
-        filters = filters.plusElement(Filter(title = "$1", text = "sent a Snap"))
+        filters = databaseHelper.getFilters()
 
         mainHandler.post(object : Runnable{
             override fun run() {
@@ -31,7 +28,7 @@ class NotificationListener: NotificationListenerService() {
                     val event = UsageEvents.Event()
                     events.getNextEvent(event)
                     if(event.packageName == "com.snapchat.android" && event.eventType == UsageEvents.Event.ACTIVITY_RESUMED){
-                        databaseHelper.removeAll()
+                        databaseHelper.removeAllSnaps()
                         (applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
                             .cancel("snap", 1)
                     }
@@ -51,7 +48,7 @@ class NotificationListener: NotificationListenerService() {
             )
             if(!sender.isNullOrBlank()){
                 val snap = Snap(sbn.key.plus("|").plus(sbn.postTime), sender, sbn.postTime)
-                databaseHelper.add(snap)
+                databaseHelper.addSnap(snap)
                 super.cancelNotification(sbn.key)
                 NotificationMaker().makeNotification(applicationContext)
             }

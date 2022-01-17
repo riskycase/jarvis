@@ -2,7 +2,6 @@ package com.riskycase.jarvis
 
 import android.app.*
 import android.content.Context
-import android.content.Intent
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 
@@ -12,7 +11,7 @@ class NotificationMaker {
     fun makeNotification(context: Context) {
         databaseHelper = DatabaseHelper(context)
 
-        val snaps = databaseHelper.getAll()
+        val snaps = databaseHelper.getAllSnaps()
 
         if(snaps.isNotEmpty()) {
 

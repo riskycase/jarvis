@@ -2,7 +2,6 @@ package com.riskycase.jarvis
 
 import android.app.AlertDialog
 import android.app.AppOpsManager
-import android.app.Dialog
 import android.app.NotificationManager
 import android.content.Context
 import android.content.DialogInterface
@@ -76,7 +75,7 @@ class MainFragment : Fragment() {
                 .setTitle("Flush current buffer?")
                 .setMessage("Are you sure you want to cancel the current notification and clear the database?")
                 .setPositiveButton("Yes") { _: DialogInterface, _: Int ->
-                    databaseHelper.removeAll()
+                    databaseHelper.removeAllSnaps()
                     (context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
                         .cancel("snap", 1)
                 }
