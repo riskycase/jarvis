@@ -16,4 +16,7 @@
     <string name="notification_access_reason">Jarvis uses notification access to intercept your Snapchat notifications and compile them into a single notification</string>
     <string name="usage_access_reason">Usage access allows Jarvis to know when you open Snapchat so it can cancel the notification</string>
     <string name="revoke_permission">Revoke</string>
+    <string name="title_activity_splash_screen">SplashScreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>
