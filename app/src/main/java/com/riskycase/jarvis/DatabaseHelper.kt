@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.widget.Toast
 
 const val DATABASE_NAME: String = "jarvis"
 const val DATABASE_VERSION: Int = 2
@@ -16,8 +17,10 @@ class DatabaseHelper(context: Context) :
     private val KEY_TIME: String = "time"
 
     private val TABLE_NAME_FILTERS: String = "filters"
-    private val KEY_TITLE: String = "title"
-    private val KEY_TEXT: String = "text"
+    private val KEY_TITLE_STRING: String = "titleString"
+    private val KEY_TITLE_TYPE: String = "titleType"
+    private val KEY_TEXT_STRING: String = "textString"
+    private val KEY_TEXT_TYPE: String = "textType"
 
     override fun onCreate(db: SQLiteDatabase?) {
         if (db != null) {
@@ -25,9 +28,24 @@ class DatabaseHelper(context: Context) :
                 "CREATE TABLE $TABLE_NAME_SNAPS($KEY_ID TEXT PRIMARY KEY, $KEY_SENDER TEXT, $KEY_TIME INTEGER)"
             )
             db.execSQL(
-                "CREATE TABLE $TABLE_NAME_FILTERS($KEY_ID NUMBER PRIMARY KEY, $KEY_TITLE TEXT, $KEY_TEXT TEXT)"
+                "CREATE TABLE $TABLE_NAME_FILTERS($KEY_ID NUMBER PRIMARY KEY, $KEY_TITLE_STRING TEXT, $KEY_TITLE_TYPE INTEGER, $KEY_TEXT_STRING TEXT, $KEY_TEXT_TYPE INTEGER)"
             )
-            resetFilters()
+
+            var filters = emptyArray<Filter>()
+            filters = filters.plusElement(Filter(title = Match("from (.+)", Match.MatchType.EXTRACT), text = Match("", Match.MatchType.EXACT)))
+            filters = filters.plusElement(Filter(title = Match("", Match.MatchType.EXACT), text = Match("from (.+)", Match.MatchType.EXTRACT)))
+            filters = filters.plusElement(Filter(title = Match("(.+)", Match.MatchType.EXTRACT), text = Match("sent a Snap", Match.MatchType.EXACT)))
+            db.delete(TABLE_NAME_FILTERS, null, null)
+            filters.forEachIndexed { index, filter ->
+                val values = ContentValues()
+                values.put(KEY_ID, index)
+                values.put(KEY_TITLE_STRING, filter.title.string)
+                values.put(KEY_TITLE_TYPE, filter.title.getTypeInt())
+                values.put(KEY_TEXT_STRING, filter.text.string)
+                values.put(KEY_TEXT_TYPE, filter.text.getTypeInt())
+                db.insert(TABLE_NAME_FILTERS, null, values)
+            }
+
         }
     }
 
@@ -89,8 +107,11 @@ class DatabaseHelper(context: Context) :
         filters.forEachIndexed { index, filter ->
             val values = ContentValues()
             values.put(KEY_ID, index)
-            values.put(KEY_TITLE, filter.title)
-            values.put(KEY_TEXT, filter.text)
+            values.put(KEY_ID, index)
+            values.put(KEY_TITLE_STRING, filter.title.string)
+            values.put(KEY_TITLE_TYPE, filter.title.getTypeInt())
+            values.put(KEY_TEXT_STRING, filter.text.string)
+            values.put(KEY_TEXT_TYPE, filter.text.getTypeInt())
             db.insert(TABLE_NAME_FILTERS, null, values)
         }
         db.close()
@@ -101,7 +122,7 @@ class DatabaseHelper(context: Context) :
         val db = this.readableDatabase
         val cursor = db.query(
             TABLE_NAME_FILTERS,
-            arrayOf(KEY_ID, KEY_TITLE, KEY_TITLE),
+            arrayOf(KEY_ID, KEY_TITLE_STRING, KEY_TITLE_TYPE, KEY_TEXT_STRING, KEY_TEXT_TYPE),
             null,
             null,
             null,
@@ -111,7 +132,16 @@ class DatabaseHelper(context: Context) :
 
         if(cursor.moveToFirst()){
             do {
-                filters = filters.plusElement(Filter(cursor.getString(1), cursor.getString(2)))
+                filters = filters.plusElement(Filter(Match(cursor.getString(1), when(cursor.getInt(2)) {
+                    0 -> Match.MatchType.EXTRACT
+                    1 -> Match.MatchType.CONTAINS
+                    else -> Match.MatchType.EXACT
+                }),
+                Match(cursor.getString(3), when(cursor.getInt(4)) {
+                    0 -> Match.MatchType.EXTRACT
+                    1 -> Match.MatchType.CONTAINS
+                    else -> Match.MatchType.EXACT
+                })))
             } while (cursor.moveToNext())
         }
 
@@ -119,24 +149,6 @@ class DatabaseHelper(context: Context) :
         db.close()
 
         return filters
-    }
-
-    fun resetFilters() {
-        val db = this.writableDatabase
-        var filters = emptyArray<Filter>()
-        filters = filters.plusElement(Filter(title = "from $1", text = ""))
-        filters = filters.plusElement(Filter(title = "", text = "from $1"))
-        filters = filters.plusElement(Filter(title = "$1", text = "sent a Snap"))
-        db.delete(TABLE_NAME_FILTERS, null, null)
-        filters.forEachIndexed { index, filter ->
-            val values = ContentValues()
-            values.put(KEY_ID, index)
-            values.put(KEY_TITLE, filter.title)
-            values.put(KEY_TEXT, filter.text)
-            db.insert(TABLE_NAME_FILTERS, null, values)
-        }
-        db.close()
-
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
