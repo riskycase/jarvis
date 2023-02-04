@@ -51,7 +51,15 @@ class NotificationListener: NotificationListenerService() {
                 sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").substring(0, 5) == "from "
             )
                 sender = sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").substring(5)
-            else if(sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").substring(0,11) == "sent a Snap")
+            else if(
+                sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").length >= 11 &&
+                sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").substring(0,11) == "sent a Snap"
+            )
+                sender = sbn.notification.extras.getString(Notification.EXTRA_TITLE, "default value")
+            else if(
+                sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").length >= 15 &&
+                sbn.notification.extras.getString(Notification.EXTRA_TEXT, "default value").substring(0,15) == "sent you a Snap"
+            )
                 sender = sbn.notification.extras.getString(Notification.EXTRA_TITLE, "default value")
             if(!sender.isNullOrBlank()){
                 val snap = Snap(sbn.key.plus("|").plus(sbn.postTime), sender, sbn.postTime)
